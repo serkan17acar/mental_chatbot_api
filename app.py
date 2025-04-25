@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+import torch
 
 app = Flask(__name__)
 
-tokenizer = T5Tokenizer.from_pretrained("t5-small")
-model = T5ForConditionalGeneration.from_pretrained("t5-small")
+MODEL_NAME = "serkanacar/t5_health_mental_model"
+tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
+model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
 
 @app.route("/predict", methods=["POST"])
 def predict():
