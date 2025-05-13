@@ -1,13 +1,22 @@
 from flask import Flask, request, jsonify
 from transformers import T5Tokenizer, T5ForConditionalGeneration
+from huggingface_hub import login
 import torch
 import random
+import os
 
 app = Flask(__name__)
+
+hf_token = os.environ.get("HUGGINGFACE_HUB_TOKEN")
+if hf_token:
+    login(token=hf_token)
+else:
+    raise EnvironmentError("HUGGINGFACE_HUB_TOKEN not found in environment variables.")
 
 MODEL_NAME = "serkanacar/mental-disorder-augmented-model"
 tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
 model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
+
 
 label_intros = {
     "depression": "Depression may involve persistent feelings of sadness, hopelessness, and a loss of interest in activities. Here are some suggestions that might help you:",
