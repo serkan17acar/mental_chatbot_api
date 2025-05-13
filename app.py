@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from transformers import T5Tokenizer, T5ForConditionalGeneration
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from huggingface_hub import login
 import torch
 import random
@@ -14,9 +14,18 @@ else:
     raise EnvironmentError("HUGGINGFACE_HUB_TOKEN not found in environment variables.")
 
 MODEL_NAME = "serkanacar/mental-disorder-augmented-model"
-tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
-model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=hf_token)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, token=hf_token)
 
+label_map = {
+    0: "normal",
+    1: "depression",
+    2: "anxiety",
+    3: "suicidal",
+    4: "stress",
+    5: "bipolar",
+    6: "personality disorder"
+}
 
 label_intros = {
     "depression": "Depression may involve persistent feelings of sadness, hopelessness, and a loss of interest in activities. Here are some suggestions that might help you:",
@@ -86,9 +95,11 @@ def predict():
             ]
         })
 
-    inputs = tokenizer.encode(user_input, return_tensors="pt", max_length=512, truncation=True)
-    outputs = model.generate(inputs, max_length=5)
-    predicted_label = tokenizer.decode(outputs[0], skip_special_tokens=True).lower()
+    inputs = tokenizer(user_input, return_tensors="pt", truncation=True, padding=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        predicted_class_id = torch.argmax(outputs.logits, dim=1).item()
+        predicted_label = label_map.get(predicted_class_id, "normal")
 
     messages = []
 
@@ -108,6 +119,5 @@ def predict():
     })
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
