@@ -12,10 +12,10 @@ model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
 label_intros = {
     "depression": "Depression may involve persistent feelings of sadness, hopelessness, and a loss of interest in activities. Here are some suggestions that might help you:",
     "anxiety": "Anxiety often includes constant worry, restlessness, and physical tension. Here are some techniques that might support you:",
-    "suicide": "Suicidal thoughts are serious and may reflect deep emotional pain. You're not alone. Please consider the suggestions below and seek professional help:",
+    "suicidal": "Suicidal thoughts are serious and may reflect deep emotional pain. You're not alone. Please consider the suggestions below and seek professional help:",
     "stress": "Stress can feel overwhelming and can manifest physically and emotionally. Here are a few tips to help you relax:",
     "bipolar": "Bipolar disorder involves shifts between emotional highs and lows. Here are some ways to help regulate your mood:",
-    "personality": "Personality-related difficulties may affect how you think, feel, and relate to others. Consider these suggestions that may offer clarity and support:"
+    "personality disorder": "Personality-related difficulties may affect how you think, feel, and relate to others. Consider these suggestions that may offer clarity and support:"
 }
 
 suggestions = {
