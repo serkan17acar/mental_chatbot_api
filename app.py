@@ -1,21 +1,24 @@
 from flask import Flask, request, jsonify
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import torch
+import os
 
 app = Flask(__name__)
 
-MODEL_NAME = "serkanacar/t5_health_mental_model"
+# 1️⃣ Yeni HF model ID’n burada:
+MODEL_NAME = os.getenv("HF_MODEL_ID", "serkanacar/mental-disorder-augmented-model")
+
 tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
-model = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
+model     = T5ForConditionalGeneration.from_pretrained(MODEL_NAME)
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    data = request.get_json()
+    data       = request.get_json()
     user_input = data.get("text", "")
 
-    inputs = tokenizer.encode(user_input, return_tensors="pt", max_length=512, truncation=True)
+    inputs  = tokenizer.encode(user_input, return_tensors="pt", max_length=512, truncation=True)
     outputs = model.generate(inputs, max_length=50)
-    result = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    result  = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     return jsonify({"response": result})
 
