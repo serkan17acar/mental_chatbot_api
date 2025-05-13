@@ -5,7 +5,6 @@ import os
 
 app = Flask(__name__)
 
-# 1️⃣ Yeni HF model ID’n burada:
 MODEL_NAME = os.getenv("HF_MODEL_ID", "serkanacar/mental-disorder-augmented-model")
 
 tokenizer = T5Tokenizer.from_pretrained(MODEL_NAME)
