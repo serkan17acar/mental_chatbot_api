@@ -7,16 +7,19 @@ import os
 
 app = Flask(__name__)
 
+# Hugging Face Auth
 hf_token = os.environ.get("HUGGINGFACE_HUB_TOKEN")
 if hf_token:
     login(token=hf_token)
 else:
     raise EnvironmentError("HUGGINGFACE_HUB_TOKEN not found in environment variables.")
 
+# Model tanımı
 MODEL_NAME = "serkanacar/mental-disorder-augmented-model"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=hf_token)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, token=hf_token)
 
+# Etiket haritası (label index → string eşlemesi)
 label_map = {
     0: "normal",
     1: "depression",
