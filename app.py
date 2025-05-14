@@ -16,6 +16,7 @@ else:
 MODEL_NAME = "serkanacar/mental-disorder-augmented-model"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=hf_token)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, token=hf_token)
+model.eval()
 
 label_map = {
     0: "normal",
@@ -43,40 +44,37 @@ suggestions = {
         "Keeping a journal can help you stay connected to your emotions."
     ],
     "depression": [
-        "Try setting small daily goals and acknowledge yourself when you complete them. If this doesn’t help, please consider seeing a professional.",
-        "Explore what your feelings might be trying to show you. If needed, don’t hesitate to reach out to a therapist.",
-        "Make a checklist of simple tasks like taking a shower or preparing breakfast. If this feels too hard, seek help from a mental health professional.",
-        "Try the 54321 technique: Name 5 things you see, 4 surfaces you can touch, 3 sounds you hear, 2 scents you smell, and 1 taste. If this doesn't help, speak with a professional."
+        "Try setting small daily goals and acknowledge yourself when you complete them.",
+        "Explore what your feelings might be trying to show you.",
+        "Make a checklist of simple tasks like taking a shower or preparing breakfast.",
+        "Try the 54321 grounding technique to reconnect with the present."
     ],
     "anxiety": [
-        "Try a breathing exercise: inhale for 4 seconds, hold for 4, exhale for 4. Repeat for a minute.",
+        "Try a breathing exercise: inhale for 4 seconds, hold for 4, exhale for 4.",
         "Progressive muscle relaxation can help—tighten and release different muscle groups.",
-        "Ask yourself: 'What does this anxiety show I care about?' Reflect, then go for a walk. If it’s too much, talk to a professional."
+        "Go for a walk and try to name things you see, hear, and feel."
     ],
     "suicidal": [
-        "Please talk to someone close to you about how you're feeling. You're not alone.",
+        "Please talk to someone close to you about how you're feeling.",
         "If you're thinking about suicide, please reach out to emergency services or call 112.",
-        "These thoughts can feel overwhelming. Seeking help is a brave and strong choice.",
-        "If you're serious about these thoughts, talk to someone you trust and get professional help as soon as possible."
+        "These thoughts can feel overwhelming. Seeking help is a strong choice.",
+        "You're not alone. Talking to a professional can really help."
     ],
     "stress": [
-        "Notice where in your body you feel tension (like your jaw or shoulders) and relax those areas.",
-        "Take a 5-minute break in nature or disconnect from screens for a moment.",
-        "Try 2 minutes of silence to remind yourself that you’re in control.",
+        "Notice where in your body you feel tension and relax those areas.",
+        "Take a 5-minute break in nature or disconnect from screens.",
         "Use the 4-7-8 breathing technique. Focus on your breath for 5 minutes.",
-        "Try a full body tension and release exercise from your feet up.",
-        "Go for a walk or do a stretching/yoga session at home to unwind.",
-        "Replace inner criticism with affirmations: 'I can do this,' or 'Just step outside today!'"
+        "Do light exercise or stretching to unwind."
     ],
     "bipolar": [
-        "If you're in a less manic state, reduce stimulants like caffeine or alcohol. In a manic state, ask yourself impulse-control questions and talk to a professional.",
-        "Try 4-7-8 or 4-4-6 breathing. Diaphragmatic breathing can calm your nervous system. If it’s not enough, see a professional.",
-        "Track your mood daily (e.g., rate 0–10). Journaling can help observe patterns. A therapist can help you explore this safely."
+        "Track your mood daily. It can help you spot patterns.",
+        "If you're feeling manic, reduce stimulants and try grounding exercises.",
+        "Talk with someone you trust and consider professional guidance."
     ],
     "personality disorder": [
-        "Track moments that trigger you and note what you feel. Reflect on whether your automatic thoughts are helpful. Therapy is highly recommended.",
-        "Practice recognizing your boundaries and others’. Journaling when emotions feel intense may help.",
-        "Psychotherapy is the most helpful path for managing these complex patterns. Please consider seeking support."
+        "Keep a journal to reflect on emotional reactions.",
+        "Recognize patterns in relationships and try to pause before reacting.",
+        "Therapy can help navigate identity and emotional regulation challenges."
     ]
 }
 
@@ -90,12 +88,13 @@ def predict():
             "messages": [
                 {
                     "sender": "bot",
-                    "text": "Hi! I'm mentAI. If you're dealing with a mental health concern or feeling emotionally overwhelmed, I'm here to help. Just start sharing, and I'll do my best to support you!"
+                    "text": "Hi! I'm mentAI. If you're dealing with a mental health concern or feeling emotionally overwhelmed, I'm here to help. Just start sharing, and I'll do my best to support you."
                 }
             ]
         })
 
     inputs = tokenizer(user_input, return_tensors="pt", truncation=True, padding=True)
+    
     with torch.no_grad():
         outputs = model(**inputs)
         predicted_class_id = torch.argmax(outputs.logits, dim=1).item()
@@ -110,7 +109,6 @@ def predict():
 
     suggestion_list = suggestions.get(predicted_label, suggestions["normal"])
     random_suggestion = random.choice(suggestion_list)
-
     messages.append({"sender": "bot", "text": random_suggestion})
 
     return jsonify({
