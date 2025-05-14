@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoModelForSequenceClassification
+from transformers import BertTokenizerFast
 from huggingface_hub import login
 import torch
 import random
@@ -14,7 +15,7 @@ else:
     raise EnvironmentError("HUGGINGFACE_HUB_TOKEN not found in environment variables.")
 
 MODEL_NAME = "serkanacar/mental-disorder-augmented-model"
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=hf_token)
+tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, token=hf_token)
 model.eval()
 
