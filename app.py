@@ -19,13 +19,13 @@ model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, token=hf_
 model.eval()
 
 label_map = {
-    0: "normal",
-    1: "depression",
-    2: "anxiety",
-    3: "suicidal",
-    4: "stress",
-    5: "bipolar",
-    6: "personality disorder"
+    0: "anxiety",
+    1: "bipolar",
+    2: "depression",
+    3: "normal",
+    4: "personality disorder",
+    5: "stress",
+    6: "suicidal"
 }
 
 label_intros = {
