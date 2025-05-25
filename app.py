@@ -78,47 +78,43 @@ suggestions = {
 }
 
 @app.route("/predict", methods=["POST"])
-def predict():
-    data = request.get_json()
-    user_input = data.get("text", "").strip()
+ def predict():
+     data = request.get_json()
+     user_input = data.get("text", "").strip()
 
-    if not user_input:
-        return jsonify({})
+     if not user_input:
+         return jsonify({})
 
-    inputs = tokenizer(user_input, return_tensors="pt", truncation=True, padding=True)
-    with torch.no_grad():
-        outputs = model(**inputs)
-        predicted_class_id = torch.argmax(outputs.logits, dim=1).item()
-        predicted_label = label_map.get(predicted_class_id, "normal")
+     inputs = tokenizer(user_input, return_tensors="pt", truncation=True, padding=True)
+     with torch.no_grad():
+         outputs = model(**inputs)
+         predicted_class_id = torch.argmax(outputs.logits, dim=1).item()
+         predicted_label = label_map.get(predicted_class_id, "normal")
 
-    messages = []
-    if predicted_label != "normal":
-        intro = label_intros.get(predicted_label, "")
-        if intro:
-            messages.append({"sender": "bot", "text": intro})
+     messages = []
 
-    suggestion_data = suggestions.get(predicted_label, suggestions["normal"])
-    if predicted_label == "depression":
-        selected_pair = random.choice(suggestion_data)
-        for suggestion in selected_pair:
-            messages.append({"sender": "bot", "text": suggestion})
-    else:
-        random_suggestion = random.choice(suggestion_data)
-        messages.append({"sender": "bot", "text": random_suggestion})
+     if predicted_label != "normal":
+         intro = label_intros.get(predicted_label, "")
+         if intro:
+             messages.append({"sender": "bot", "text": intro})
+
+     suggestion_data = suggestions.get(predicted_label, suggestions["normal"])
+     if predicted_label == "depression":
+         selected_pair = random.choice(suggestion_data)
+         for suggestion in selected_pair:
+             messages.append({"sender": "bot", "text": suggestion})
+     else:
+         random_suggestion = random.choice(suggestion_data)
+         messages.append({"sender": "bot", "text": random_suggestion})
 
     now = datetime.utcnow()
-    json_msgs = []
     for i, msg in enumerate(messages):
-        json_msgs.append({
-            "sender": msg["sender"],
-            "text": msg["text"],
-            "timestamp": (now + timedelta(seconds=i)).isoformat() + "Z"
-        })
+        msg["timestamp"] = (now + timedelta(seconds=i)).isoformat() + "Z"
 
-    return jsonify({
-        "label": predicted_label,
-        "messages": json_msgs
-    })
+     return jsonify({
+         "label": predicted_label,
+        "messages": messages    # artık her bir objede "timestamp" da var
+     })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
