@@ -5,6 +5,7 @@ from huggingface_hub import login
 import torch
 import random
 import os
+from datetime import datetime, timedelta 
 
 app = Flask(__name__)
 
@@ -85,21 +86,18 @@ def predict():
         return jsonify({})
 
     inputs = tokenizer(user_input, return_tensors="pt", truncation=True, padding=True)
-    
     with torch.no_grad():
         outputs = model(**inputs)
         predicted_class_id = torch.argmax(outputs.logits, dim=1).item()
         predicted_label = label_map.get(predicted_class_id, "normal")
 
     messages = []
-
     if predicted_label != "normal":
         intro = label_intros.get(predicted_label, "")
         if intro:
             messages.append({"sender": "bot", "text": intro})
 
     suggestion_data = suggestions.get(predicted_label, suggestions["normal"])
-
     if predicted_label == "depression":
         selected_pair = random.choice(suggestion_data)
         for suggestion in selected_pair:
@@ -108,9 +106,18 @@ def predict():
         random_suggestion = random.choice(suggestion_data)
         messages.append({"sender": "bot", "text": random_suggestion})
 
+    now = datetime.utcnow()
+    json_msgs = []
+    for i, msg in enumerate(messages):
+        json_msgs.append({
+            "sender": msg["sender"],
+            "text": msg["text"],
+            "timestamp": (now + timedelta(seconds=i)).isoformat() + "Z"
+        })
+
     return jsonify({
         "label": predicted_label,
-        "messages": messages
+        "messages": json_msgs
     })
 
 if __name__ == "__main__":
